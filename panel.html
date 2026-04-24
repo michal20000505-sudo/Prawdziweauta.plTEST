@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Właściciela — Prawdziwe Auta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:wght@300;400;500&family=IM+Fell+English+SC&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --copper:       #B5783A;
+      --copper-light: #D4954A;
+      --copper-dark:  #8A5A26;
+      --copper-glow:  rgba(181,120,58,.18);
+      --black:        #0D0D0D;
+      --off-black:    #1A1A1A;
+      --charcoal:     #2A2A2A;
+      --white:        #F8F4EE;
+      --off-white:    #EDE8DF;
+      --mid:          #C8BFB0;
+    }
+
+    body {
+      background-color: var(--white);
+      color: var(--black);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      min-height: 100vh;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: var(--off-black);
+      padding: 10px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--copper);
+    }
+    .topbar-logo {
+      font-family: 'IM Fell English SC', serif;
+      font-size: 22px;
+      color: var(--white);
+      letter-spacing: .12em;
+    }
+    .topbar-logo span { color: var(--copper); }
+    .topbar-meta {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      color: var(--mid);
+      letter-spacing: .08em;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--black);
+      text-align: center;
+      padding: 52px 20px 44px;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent, transparent 18px,
+        rgba(181,120,58,.05) 18px, rgba(181,120,58,.05) 19px
+      );
+      pointer-events: none;
+    }
+    .header-ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .header-ornament::before,
+    .header-ornament::after {
+      content: '';
+      display: block;
+      width: 90px; height: 1px;
+      background: linear-gradient(to right, transparent, var(--copper));
+    }
+    .header-ornament::after {
+      background: linear-gradient(to left, transparent, var(--copper));
+    }
+    .header-diamond {
+      width: 9px; height: 9px;
+      background: var(--copper);
+      transform: rotate(45deg);
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(26px, 4vw, 42px);
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: .06em;
+      line-height: 1.15;
+    }
+    header h1 span { color: var(--copper); }
+    header p {
+      margin-top: 12px;
+      font-size: 15px;
+      color: var(--mid);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .section-title h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--off-black);
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+    .section-title::after {
+      content: '';
+      display: block;
+      flex: 1; height: 1px;
+      background: linear-gradient(to right, var(--copper), transparent);
+    }
+    .section-num {
+      width: 32px; height: 32px;
+      background: var(--copper);
+      color: var(--white);
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--off-white);
+      border-top: 3px solid var(--copper);
+      padding: 36px 40px;
+      margin-bottom: 36px;
+      box-shadow: 0 2px 24px rgba(0,0,0,.06);
+    }
+
+    /* ── GRID ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 32px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px 28px; }
+    .span-2 { grid-column: span 2; }
+    .span-3 { grid-column: span 3; }
+
+    @media (max-width: 700px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .span-2, .span-3 { grid-column: span 1; }
+      .card { padding: 24px 20px; }
+    }
+
+    /* ── FIELD ── */
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field label {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+    }
+    .field label .req { color: var(--copper); margin-left: 2px; }
+
+    .field input,
+    .field select,
+    .field textarea {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      color: var(--black);
+      background: var(--white);
+      border: 1px solid var(--mid);
+      border-bottom: 2px solid var(--mid);
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23B5783A' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--copper);
+      border-bottom-color: var(--copper);
+      box-shadow: 0 2px 0 0 var(--copper), 0 4px 16px var(--copper-glow);
+    }
+    .field textarea { resize: vertical; min-height: 130px; line-height: 1.6; }
+
+    .field-hint {
+      font-size: 12px;
+      color: #999;
+      letter-spacing: .03em;
+    }
+
+    /* ── INPUT WITH UNIT ── */
+    .input-unit {
+      position: relative;
+    }
+    .input-unit input { padding-right: 52px; }
+    .input-unit .unit {
+      position: absolute;
+      right: 14px; top: 50%; transform: translateY(-50%);
+      font-size: 13px;
+      color: var(--copper);
+      font-weight: 500;
+      letter-spacing: .06em;
+      pointer-events: none;
+    }
+
+    /* ── PHOTO UPLOAD ── */
+    .upload-zone {
+      border: 2px dashed var(--mid);
+      background: var(--off-white);
+      padding: 48px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .25s, background .25s;
+      position: relative;
+    }
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--copper);
+      background: #FAF5EF;
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon {
+      width: 54px; height: 54px;
+      margin: 0 auto 16px;
+      border: 2px solid var(--copper);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .upload-icon::before,
+    .upload-icon::after {
+      content: '';
+      position: absolute;
+      background: var(--copper);
+    }
+    .upload-icon::before { width: 2px; height: 24px; }
+    .upload-icon::after  { width: 24px; height: 2px; }
+    .upload-zone h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: var(--off-black);
+      margin-bottom: 6px;
+    }
+    .upload-zone p {
+      font-size: 14px;
+      color: #999;
+      letter-spacing: .04em;
+    }
+    .upload-zone .upload-hint {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--copper);
+      border-bottom: 1px solid var(--copper-light);
+      padding-bottom: 1px;
+    }
+
+    /* ── PHOTO GRID PREVIEW ── */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .photo-thumb {
+      position: relative;
+      aspect-ratio: 4/3;
+      background: var(--off-white);
+      border: 1px solid var(--mid);
+      overflow: hidden;
+    }
+    .photo-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .photo-thumb .main-badge {
+      position: absolute;
+      top: 6px; left: 6px;
+      background: var(--copper);
+      color: var(--white);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      font-family: 'Cormorant Garamond', serif;
+    }
+    .photo-thumb .remove-btn {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 24px; height: 24px;
+      background: var(--off-black);
+      color: var(--white);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .photo-thumb:hover .remove-btn { opacity: 1; }
+
+    /* ── CHECKBOXES ── */
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px 20px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 6px 0;
+    }
+    .checkbox-item input[type="checkbox"] { display: none; }
+    .checkbox-box {
+      width: 18px; height: 18px;
+      border: 2px solid var(--mid);
+      flex-shrink: 0;
+      position: relative;
+      transition: border-color .2s;
+    }
+    .checkbox-item:hover .checkbox-box { border-color: var(--copper); }
+    .checkbox-item input:checked ~ .checkbox-box {
+      border-color: var(--copper);
+      background: var(--copper);
+    }
+    .checkbox-item input:checked ~ .checkbox-box::after {
+      content: '';
+      position: absolute;
+      left: 3px; top: 0px;
+      width: 5px; height: 10px;
+      border: 2px solid var(--white);
+      border-top: none; border-left: none;
+      transform: rotate(45deg);
+    }
+    .checkbox-label {
+      font-size: 15px;
+      color: var(--charcoal);
+      letter-spacing: .02em;
+    }
+
+    /* ── STATUS TOGGLE ── */
+    .status-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .status-opt {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .status-opt input[type="radio"] { display: none; }
+    .status-pill {
+      padding: 8px 22px;
+      border: 1px solid var(--mid);
+      font-size: 13px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+      transition: all .2s;
+    }
+    .status-opt input:checked ~ .status-pill {
+      background: var(--copper);
+      border-color: var(--copper);
+      color: var(--white);
+    }
+    .status-opt:hover .status-pill { border-color: var(--copper); }
+
+    /* ── PRICE HIGHLIGHT ── */
+    .price-box {
+      background: var(--off-black);
+      padding: 28px 32px;
+      border-left: 4px solid var(--copper);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+    .price-box-label {
+      font-family: 'IM Fell English SC', serif;
+      font-size: 13px;
+      letter-spacing: .12em;
+      color: var(--mid);
+    }
+    .price-box-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--copper);
+      line-height: 1;
+    }
+    .price-box-sub {
+      font-size: 13px;
+      color: #777;
+      margin-top: 4px;
+    }
+    .price-input-wrap {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid #444;
+      border-bottom: 2px solid var(--copper);
+    }
+    .price-currency {
+      background: var(--charcoal);
+      color: var(--copper);
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      padding: 10px 16px;
+      display: flex; align-items: center;
+      border-right: 1px solid #444;
+      flex-shrink: 0;
+    }
+    .price-input-wrap input {
+      background: var(--charcoal);
+      color: var(--white);
+      border: none;
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 600;
+      padding: 10px 16px;
+      outline: none;
+      width: 220px;
+    }
+    .price-input-wrap input::placeholder { color: #666; }
+
+    /* ── BUTTONS ── */
+    .btn-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      font-family: 'IM Fell English SC', serif;
+      font-size: 14px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      padding: 14px 36px;
+      border: none;
+      cursor: pointer;
+      transition: all .2s;
+      display: inline-flex; align-items: center; gap: 10px;
+    }
+    .btn-primary {
+      background: var(--copper);
+      color: var(--white);
+    }
+    .btn-primary:hover {
+      background: var(--copper-light);
+      box-shadow: 0 4px 20px var(--copper-glow);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--charcoal);
+      border: 1px solid var(--mid);
+    }
+    .btn-secondary:hover {
+      border-color: var(--copper);
+      color: var(--copper);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: #999;
+      padding: 14px 0;
+      text-decoration: underline;
+      text-decoration-color: transparent;
+    }
+    .btn-ghost:hover { color: var(--copper); text-decoration-color: var(--copper); }
+
+    /* success modal */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.65);
+      z-index: 999;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--white);
+      max-width: 440px; width: 90%;
+      padding: 52px 44px;
+      text-align: center;
+      border-top: 4px solid var(--copper);
+      position: relative;
+    }
+    .modal-check {
+      width: 60px; height: 60px;
+      border: 2px solid var(--copper);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 26px;
+      color: var(--copper);
+    }
+    .modal h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      margin-bottom: 12px;
+    }
+    .modal p { font-size: 15px; color: #777; line-height: 1.6; }
+    .modal .btn { margin-top: 28px; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex; align-items: center; gap: 16px;
+      margin: 8px 0 32px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--off-white);
+    }
+    .divider-diamond {
+      width: 7px; height: 7px;
+      background: var(--copper);
+      transform: rotate(45deg);
+    }
+
+    /* ── COUNTER ── */
+    .char-count { font-size: 12px; color: #aaa; text-align: right; margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">Prawdziwe<span>Auta</span>.pl</div>
+  <div class="topbar-meta">Panel Właściciela &nbsp;/&nbsp; Nowe Ogłoszenie</div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-ornament"><div class="header-diamond"></div></div>
+  <h1>Dodaj <span>Pojazd</span> do Oferty</h1>
+  <p>Wypełnij formularz — Twoje ogłoszenie zostanie opublikowane po weryfikacji</p>
+</header>
+
+<!-- PAGE -->
+<div class="page">
+
+  <form id="carForm" novalidate>
+
+    <!-- ══ SEKCJA 1 — PODSTAWOWE INFORMACJE ══ -->
+    <div class="section-title">
+      <div class="section-num">1</div>
+      <h2>Podstawowe Informacje</h2>
+    </div>
+
+    <div class="card">
+      <div class="grid-3">
+        <div class="field">
+          <label>Marka <span class="req">*</span></label>
+          <select required>
+            <option value="">— wybierz —</option>
+            <option>Alfa Romeo</option><option>Aston Martin</option>
+            <option>Audi</option><option>BMW</option>
+            <option>Bentley</option><option>Bugatti</option>
+            <option>Cadillac</option><option>Chevrolet</option>
+            <option>Chrysler</option><option>Citroën</option>
+            <option>Dodge</option><option>Ferrari</option>
+            <option>Fiat</option><option>Ford</option>
+            <option>Honda</option><option>Jaguar</option>
+            <option>Jeep</option><option>Kia</option>
+            <option>Lamborghini</option><option>Land Rover</option>
+            <option>Lexus</option><option>Maserati</option>
+            <option>Mazda</option><option>Mercedes-Benz</option>
+            <option>MINI</option><option>Mitsubishi</option>
+            <option>Nissan</option><option>Opel</option>
+            <option>Peugeot</option><option>Porsche</option>
+            <option>Renault</option><option>Rolls-Royce</option>
+            <option>Seat</option><option>Skoda</option>
+            <option>Subaru</option><option>Suzuki</option>
+            <option>Tesla</option><option>Toyota</option>
+            <option>Volkswagen</option><option>Volvo</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Model <span class="req">*</span></label>
+          <input type="text" placeholder="np. E-Class, 3 Series, Corolla…" required />
+        </div>
+        <div class="field">
+          <label>Wersja / Trim</label>
+          <input type="text" placeholder="np. AMG Line, xDrive, SR+" />
+        </div>
+
+        <div class="field">
+          <label>Rok produkcji <span class="req">*</span></label>
+          <select required>
+            <option value="">— rok —</option>
+            <script>
+              for(let y=2025;y>=1950;y--) document.write(`<option>${y}</option>`);
+            </script>
+          </select>
+        </div>
+        <div class="field">
+          <label>Przebieg <span class="req">*</span></label>
+          <div class="input-unit">
+            <input type="number" placeholder="np. 85 000" min="0" required />
+            <span class="unit">km</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Kolor nadwozia</label>
+          <input type="text" placeholder="np. Czarny Obsydian, Biały Perłowy…" />
+        </div>
+
+        <div class="field">
+          <label>Typ nadwozia</label>
+          <select>
+            <option value="">— typ —</option>
+            <option>Sedan</option><option>Kombi</option>
+            <option>Hatchback</option><option>SUV / Crossover</option>
+            <option>Coupe</option><option>Kabriolet</option>
+            <option>Van / Minivan</option><option>Pickup</option>
+            <option>Roadster</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Liczba drzwi</label>
+          <select>
+            <option value="">—</option>
+            <option>2</option><option>3</option>
+            <option>4</option><option>5</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Liczba miejsc</label>
+          <select>
+            <option value="">—</option>
+            <option>2</option><option>4</option>
+            <option>5</option><option>6</option>
+            <option>7</option><option>8</option>
+            <option>9</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SEKCJA 2 — DANE TECHNICZNE ══ -->
+    <div class="section-title">
+      <div class="section-num">2</div>
+      <h2>Dane Techniczne</h2>
+    </div>
+
+    <div class="card">
+      <div class="grid-3">
+        <div class="field">
+          <label>Rodzaj paliwa <span class="req">*</span></label>
+          <select required>
+            <option value="">— paliwo —</option>
+            <option>Benzyna</option>
+            <option>Benzyna + LPG</option>
+            <option>Diesel</option>
+            <option>Hybryda</option>
+            <option>Hybryda Plug-in</option>
+            <option>Elektryczny</option>
+            <option>Wodór</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Skrzynia biegów</label>
+          <select>
+            <option value="">— skrzynia —</option>
+            <option>Manualna</option>
+            <option>Automatyczna</option>
+            <option>Dwusprzęgłowa (DSG/S-Tronic)</option>
+            <option>CVT</option>
+            <option>Sekwencyjna</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Napęd</label>
+          <select>
+            <option value="">— napęd —</option>
+            <option>FWD (przód)</option>
+            <option>RWD (tył)</option>
+            <option>AWD / 4x4 stały</option>
+            <option>4x4 dołączany</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Pojemność silnika</label>
+          <div class="input-unit">
+            <input type="number" placeholder="np. 1998" step="1" min="0" />
+            <span class="unit">cm³</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Moc silnika</label>
+          <div class="input-unit">
+            <input type="number" placeholder="np. 245" min="0" />
+            <span class="unit">KM</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Moment obrotowy</label>
+          <div class="input-unit">
+            <input type="number" placeholder="np. 400" min="0" />
+            <span class="unit">Nm</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Zużycie paliwa (miasto)</label>
+          <div class="input-unit">
+            <input type="number" placeholder="np. 9.2" step=".1" min="0" />
+            <span class="unit">l/100</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Zużycie paliwa (trasa)</label>
+          <div class="input-unit">
+            <input type="number" placeholder="np. 5.8" step=".1" min="0" />
+            <span class="unit">l/100</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Emisja CO₂</label>
+          <div class="input-unit">
+            <input type="number" placeholder="np. 145" min="0" />
+            <span class="unit">g/km</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Numer VIN</label>
+          <input type="text" placeholder="17-znakowy numer VIN" maxlength="17" style="text-transform:uppercase;" />
+          <span class="field-hint">Opcjonalnie — widoczny tylko dla administratora</span>
+        </div>
+        <div class="field">
+          <label>Nr rejestracyjny</label>
+          <input type="text" placeholder="np. WA 12345" style="text-transform:uppercase;" />
+          <span class="field-hint">Opcjonalnie — nie będzie publiczny</span>
+        </div>
+        <div class="field">
+          <label>Stan pojazdu <span class="req">*</span></label>
+          <select required>
+            <option value="">— stan —</option>
+            <option>Nowy</option>
+            <option>Używany — doskonały</option>
+            <option>Używany — bardzo dobry</option>
+            <option>Używany — dobry</option>
+            <option>Do odnowienia</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SEKCJA 3 — WYPOSAŻENIE ══ -->
+    <div class="section-title">
+      <div class="section-num">3</div>
+      <h2>Wyposażenie &amp; Opcje</h2>
+    </div>
+
+    <div class="card">
+      <div class="checkbox-grid">
+        <label class="checkbox-item">
+          <input type="checkbox" checked />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Klimatyzacja automatyczna</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" checked />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Nawigacja GPS</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Skórzana tapicerka</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" checked />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Podgrzewane fotele</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Wentylowane fotele</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" checked />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Apple CarPlay / Android Auto</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Head-Up Display</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Dach panoramiczny</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" checked />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Tempomat adaptacyjny</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Asystent pasa ruchu</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" checked />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Kamera cofania</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Kamery 360°</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Parkowanie automatyczne</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" checked />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Czujniki parkowania</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Pneumatyczne zawieszenie</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" checked />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Felgi aluminiowe</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">System audio premium</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Hak holowniczy</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Elektryczna klapa bagażnika</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Bezkluczykowy dostęp</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" checked />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Podgrzewana przednia szyba</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Szyby elektr. (4 szt.)</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Elektr. lusterka boczne</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" />
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Ładowarka indukcyjna</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ══ SEKCJA 4 — OPIS ══ -->
+    <div class="section-title">
+      <div class="section-num">4</div>
+      <h2>Opis Ogłoszenia</h2>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>Tytuł ogłoszenia <span class="req">*</span></label>
+        <input type="text" placeholder="np. BMW M3 Competition 2022 — Niebieski Individual, 510 KM" required />
+      </div>
+      <br />
+      <div class="field">
+        <label>Opis pojazdu <span class="req">*</span></label>
+        <textarea id="descText" placeholder="Opisz historię pojazdu, stan techniczny, przeprowadzone serwisy, powód sprzedaży, wyposażenie dodatkowe…" required oninput="updateCount()"></textarea>
+        <div class="char-count" id="charCount">0 znaków</div>
+      </div>
+      <br />
+      <div class="field">
+        <label>Historia serwisowa</label>
+        <select>
+          <option value="">— wybierz —</option>
+          <option>Pełna historia serwisowa ASO</option>
+          <option>Częściowa historia serwisowa</option>
+          <option>Serwisowany poza ASO (dokumenty)</option>
+          <option>Brak dokumentów serwisowych</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ══ SEKCJA 5 — ZDJĘCIA ══ -->
+    <div class="section-title">
+      <div class="section-num">5</div>
+      <h2>Zdjęcia Pojazdu</h2>
+    </div>
+
+    <div class="card">
+      <div class="upload-zone" id="dropZone">
+        <input type="file" accept="image/*" multiple id="fileInput" />
+        <div class="upload-icon"></div>
+        <h3>Przeciągnij zdjęcia tutaj</h3>
+        <p>lub kliknij, aby wybrać pliki z dysku</p>
+        <span class="upload-hint">JPG, PNG, WEBP &nbsp;·&nbsp; maks. 20 MB każde &nbsp;·&nbsp; do 30 zdjęć</span>
+      </div>
+
+      <div class="photo-grid" id="photoGrid">
+        <!-- przykładowe zdjęcia poglądowe -->
+        <div class="photo-thumb">
+          <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&q=80" alt="" />
+          <div class="main-badge">Główne</div>
+          <button type="button" class="remove-btn" onclick="removeThumb(this)">✕</button>
+        </div>
+        <div class="photo-thumb">
+          <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&q=80" alt="" />
+          <button type="button" class="remove-btn" onclick="removeThumb(this)">✕</button>
+        </div>
+        <div class="photo-thumb">
+          <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&q=80" alt="" />
+          <button type="button" class="remove-btn" onclick="removeThumb(this)">✕</button>
+        </div>
+        <div class="photo-thumb">
+          <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&q=80" alt="" />
+          <button type="button" class="remove-btn" onclick="removeThumb(this)">✕</button>
+        </div>
+        <div class="photo-thumb">
+          <img src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=400&q=80" alt="" />
+          <button type="button" class="remove-btn" onclick="removeThumb(this)">✕</button>
+        </div>
+      </div>
+
+      <p style="margin-top:16px;font-size:13px;color:#999;letter-spacing:.04em;">
+        Pierwsze zdjęcie będzie miniaturą ogłoszenia. Aby zmienić kolejność, przeciągnij zdjęcia.
+      </p>
+    </div>
+
+    <!-- ══ SEKCJA 6 — CENA I STATUS ══ -->
+    <div class="section-title">
+      <div class="section-num">6</div>
+      <h2>Cena &amp; Publikacja</h2>
+    </div>
+
+    <div class="price-box">
+      <div>
+        <div class="price-box-label">Cena sprzedaży</div>
+        <div class="price-box-value" id="priceDisplay">—</div>
+        <div class="price-box-sub">brutto / do negocjacji</div>
+      </div>
+      <div>
+        <div class="price-input-wrap">
+          <div class="price-currency">PLN</div>
+          <input type="number" id="priceInput" placeholder="0" min="0" step="100"
+                 oninput="updatePrice()" style="width:200px;" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;">
+      <div class="grid-2">
+        <div class="field">
+          <label>Możliwość negocjacji</label>
+          <div class="status-row" style="margin-top:4px;">
+            <label class="status-opt">
+              <input type="radio" name="nego" value="tak" checked />
+              <div class="status-pill">Tak</div>
+            </label>
+            <label class="status-opt">
+              <input type="radio" name="nego" value="nie" />
+              <div class="status-pill">Nie</div>
+            </label>
+            <label class="status-opt">
+              <input type="radio" name="nego" value="zamiana" />
+              <div class="status-pill">Zamiana</div>
+            </label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Finansowanie</label>
+          <div class="status-row" style="margin-top:4px;">
+            <label class="status-opt">
+              <input type="radio" name="fin" value="brak" checked />
+              <div class="status-pill">Brak</div>
+            </label>
+            <label class="status-opt">
+              <input type="radio" name="fin" value="leasing" />
+              <div class="status-pill">Leasing</div>
+            </label>
+            <label class="status-opt">
+              <input type="radio" name="fin" value="kredyt" />
+              <div class="status-pill">Kredyt</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Status ogłoszenia</label>
+          <div class="status-row" style="margin-top:4px;">
+            <label class="status-opt">
+              <input type="radio" name="status" value="pub" checked />
+              <div class="status-pill">Opublikuj od razu</div>
+            </label>
+            <label class="status-opt">
+              <input type="radio" name="status" value="draft" />
+              <div class="status-pill">Zapisz jako szkic</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Widoczność telefonu kontaktowego</label>
+          <div class="status-row" style="margin-top:4px;">
+            <label class="status-opt">
+              <input type="radio" name="phone" value="show" checked />
+              <div class="status-pill">Widoczny</div>
+            </label>
+            <label class="status-opt">
+              <input type="radio" name="phone" value="hide" />
+              <div class="status-pill">Ukryty</div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PRZYCISKI ══ -->
+    <div class="divider"><div class="divider-diamond"></div></div>
+
+    <div class="btn-row">
+      <button type="button" class="btn btn-primary" onclick="submitForm()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><path d="M2 8h12M8 2l6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Opublikuj Ogłoszenie
+      </button>
+      <button type="button" class="btn btn-secondary">Zapisz Szkic</button>
+      <button type="button" class="btn btn-secondary">Podgląd</button>
+      <button type="button" class="btn btn-ghost">Anuluj</button>
+    </div>
+
+  </form>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-check">✓</div>
+    <h2>Ogłoszenie Dodane</h2>
+    <p>Twój pojazd został przesłany do weryfikacji. Po akceptacji przez administratora pojawi się na stronie głównej.</p>
+    <button class="btn btn-primary" onclick="closeModal()">
+      Powrót do Panelu
+    </button>
+  </div>
+</div>
+
+<script>
+  // ── Licznik znaków w opisie
+  function updateCount() {
+    const n = document.getElementById('descText').value.length;
+    document.getElementById('charCount').textContent = n + ' znaków';
+  }
+
+  // ── Aktualizacja podglądu ceny
+  function updatePrice() {
+    const v = parseInt(document.getElementById('priceInput').value) || 0;
+    document.getElementById('priceDisplay').textContent =
+      v > 0 ? v.toLocaleString('pl-PL') + ' PLN' : '—';
+  }
+
+  // ── Usuwanie zdjęcia
+  function removeThumb(btn) {
+    btn.closest('.photo-thumb').remove();
+    updateMainBadge();
+  }
+  function updateMainBadge() {
+    const thumbs = document.querySelectorAll('.photo-thumb');
+    thumbs.forEach((t,i) => {
+      const b = t.querySelector('.main-badge');
+      if (i === 0) { if (!b) { const nb = document.createElement('div'); nb.className='main-badge'; nb.textContent='Główne'; t.appendChild(nb); } }
+      else { if (b) b.remove(); }
+    });
+  }
+
+  // ── Upload zdjęć (podgląd lokalny)
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    [...e.target.files].forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = ev => addThumb(ev.target.result);
+      reader.readAsDataURL(file);
+    });
+  });
+  function addThumb(src) {
+    const grid = document.getElementById('photoGrid');
+    const div = document.createElement('div'); div.className = 'photo-thumb';
+    div.innerHTML = `<img src="${src}" alt="" /><button type="button" class="remove-btn" onclick="removeThumb(this)">✕</button>`;
+    grid.appendChild(div);
+    updateMainBadge();
+  }
+
+  // ── Drag & drop
+  const zone = document.getElementById('dropZone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    [...e.dataTransfer.files].forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = ev => addThumb(ev.target.result);
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // ── Submit modal
+  function submitForm() {
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+  }
+  document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+</script>
+</body>
+</html>
